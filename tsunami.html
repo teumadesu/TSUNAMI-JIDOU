@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+body {
+  background:black;
+  color:white;
+  font-family: Arial;
+  font-size: 50px;
+}
+#title {font-weight:bold;}
+</style>
+</head>
+
+<body>
+<div id="title">津波情報取得中...</div>
+<div id="area"></div>
+
+<script>
+let alerts = [];
+let index = 0;
+
+async function loadJSON() {
+  let res = await fetch("tsunami.json?"+Date.now());
+  let data = await res.json();
+
+  alerts = [];
+  data.big.forEach(a => alerts.push(["大津波警報", a, "purple"]));
+  data.warn.forEach(a => alerts.push(["津波警報", a, "red"]));
+  data.adv.forEach(a => alerts.push(["津波注意報", a, "yellow"]));
+
+  if (alerts.length == 0) {
+    document.body.style.background="black";
+    document.getElementById("title").innerText="津波警報・注意報は発表されていません";
+    document.getElementById("area").innerText="";
+  }
+}
+
+function showNext() {
+  if (alerts.length == 0) return;
+
+  let [t,a,c] = alerts[index];
+  document.body.style.background=c;
+  document.getElementById("title").innerText=t;
+  document.getElementById("area").innerText=a;
+
+  index = (index+1) % alerts.length;
+}
+
+setInterval(loadJSON, 10000);
+setInterval(showNext, 5000);
+</script>
+</body>
+</html>
